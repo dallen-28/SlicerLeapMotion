@@ -1,9 +1,15 @@
 
 set(proj grt)
 
+if(SWIG_DIR AND EXISTS ${SWIG_DIR})
+  set(_depends "")
+else()
+  set(_depends SWIG)
+endif()
+
 # Set dependency list
 set(${proj}_DEPENDS
-  Swig
+  ${_depends}
   )
 
 # Include dependent projects if any
