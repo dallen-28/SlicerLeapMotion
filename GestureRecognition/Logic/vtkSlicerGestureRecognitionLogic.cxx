@@ -22,16 +22,10 @@
 #include <vtkMRMLScene.h>
 
 // VTK includes
-#include <vtkIntArray.h>
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
 #include <vtkMatrix4x4.h>
 #include <vtkTransform.h>
-#include <iostream>
-#include <filesystem>
-#include <string>
-#include <windows.h>
-#include <qicon.h>
 
 // STD includes
 #include <cassert>
@@ -43,17 +37,6 @@ vtkStandardNewMacro(vtkSlicerGestureRecognitionLogic);
 static void func(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
 static double* RotMatrixToEulerAngles(vtkMatrix4x4 *R);
 static GRT::ANBC anbcModel;
-
-class Gesture : vtkMRMLLinearTransformNode
-{
-  Gesture() {}
-  Gesture(int a)
-  {
-	gestureNum = a;
-  }
-public:
-  int gestureNum;
-};
 
 
 //----------------------------------------------------------------------------
