@@ -28,12 +28,17 @@
 #include "vtkSlicerModuleLogic.h"
 
 // MRML includes
-#include <GRT.h>
+#include "vtkMRMLLinearTransformNode.h"
 
 // STD includes
 #include <cstdlib>
 
+// GRT includes
+#include "GRT.h"
+#include "vtkMatrix4x4.h"
+
 #include "vtkSlicerGestureRecognitionModuleLogicExport.h"
+#include "vtkCallbackCommand.h"
 
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
@@ -42,9 +47,16 @@ class VTK_SLICER_GESTURERECOGNITION_MODULE_LOGIC_EXPORT vtkSlicerGestureRecognit
 {
 public:
 
+  enum
+  {
+	GestureRecognizedEvent = 180023918
+  };
+
   static vtkSlicerGestureRecognitionLogic *New();
   vtkTypeMacro(vtkSlicerGestureRecognitionLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
+
+  void StartPrediction(vtkMRMLLinearTransformNode *node);
 
 protected:
   vtkSlicerGestureRecognitionLogic();
@@ -56,7 +68,14 @@ protected:
   virtual void UpdateFromMRMLScene();
   virtual void OnMRMLSceneNodeAdded(vtkMRMLNode* node);
   virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
+
+  //virtual void Execute(vtkObject *vtkNotUsed(caller), unsigned long eid, void *vtkNotUsed(calldata));
+
+
 private:
+
+  //static void func(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
+  vtkSmartPointer<vtkCallbackCommand> transformModifiedCallback;
 
   vtkSlicerGestureRecognitionLogic(const vtkSlicerGestureRecognitionLogic&); // Not implemented
   void operator=(const vtkSlicerGestureRecognitionLogic&); // Not implemented
