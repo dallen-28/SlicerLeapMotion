@@ -36,7 +36,6 @@ endif()
 #-----------------------------------------------------------------------------
 # Extension modules
 add_subdirectory(GestureRecognition)
-add_subdirectory(LeapCalibration)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------

@@ -37,6 +37,9 @@ vtkStandardNewMacro(vtkSlicerGestureRecognitionLogic);
 static void func(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
 static double* RotMatrixToEulerAngles(vtkMatrix4x4 *R);
 static GRT::ANBC anbcModel;
+static GRT::DecisionTree decisionTreeModel;
+static GRT::AdaBoost adaBoostModel;
+static GRT::KNN knnModel;
 
 
 //----------------------------------------------------------------------------
@@ -69,10 +72,25 @@ void vtkSlicerGestureRecognitionLogic::SetMRMLSceneInternal(vtkMRMLScene * newSc
 }
 void vtkSlicerGestureRecognitionLogic::StartPrediction(vtkMRMLLinearTransformNode* transformNode)
 {
+
+  if(!decisionTreeModel.load("C:\\GRT\\grt-bin\\Debug\\DecisionTreeModel.grt"))
+  {
+	vtkErrorMacro("Failed to load Decision Tree Model");
+  }
+  
+  if (!adaBoostModel.load("C:\\GRT\\grt-bin\\Debug\\AdaBoostModel.grt"))
+  {
+	vtkErrorMacro("Failed to load AdaBoost Model");
+  }
+
   // Load Adaptive Naive Bayes Classifier Model
-  if (!anbcModel.load("anbcModel.grt"))
+  if (!anbcModel.load("C:\\GRT\\grt-bin\\Debug\\anbcModel.grt"))
   {
 	vtkErrorMacro("Failed to load ANBC Model");
+  }
+  if (!knnModel.load("C:\\GRT\\grt-bin\\Debug\\kNNModel.grt"))
+  {
+	vtkErrorMacro("Failed to load KNN Model");
   }
 
   // Attach observer to transformNode
@@ -83,25 +101,50 @@ void vtkSlicerGestureRecognitionLogic::StartPrediction(vtkMRMLLinearTransformNod
 static void func(vtkObject *caller, unsigned long eid, void* clientdata, void *calldata)
 {
   vtkMRMLLinearTransformNode* node = static_cast<vtkMRMLLinearTransformNode*>(caller);
-  vtkMatrix4x4* matr;
-  node->GetMatrixTransformToParent(matr);
+  vtkNew<vtkMatrix4x4> matr;
+  node->GetMatrixTransformFromParent(matr);
   double *ang = RotMatrixToEulerAngles(matr);
+  //double *ang = RotMatrixToEulerAngles(matr);
 
   GRT::VectorFloat inputVector(3);
   inputVector.at(0) = ang[0];
   inputVector.at(1) = ang[1];
   inputVector.at(2) = ang[2];
 
-  if (!anbcModel.predict(inputVector))
+  //-0.373671739183 - 0.0542107947893 - 0.0389651794363
+  //inputVector.at(0) = -0.373671739183;
+  //inputVector.at(1) = -0.0542107947893;
+  //inputVector.at(2) = -0.0389651794363;
+
+  /*if (!anbcModel.predict(inputVector))
+  {
+	std::cout << "Failed to perform prediction\n";
+	return;
+  }*/
+
+  if (!decisionTreeModel.predict(inputVector))
   {
 	std::cout << "Failed to perform prediction\n";
 	return;
   }
-  UINT predictedClass = anbcModel.getPredictedClassLabel();
+  /*if (!adaBoostModel.predict(inputVector))
+  {
+	std::cout << "Failed to perform prediction\n";
+	return;
+  }*/
+  /*if (!knnModel.predict(inputVector))
+  {
+	std::cout << "Failed to perform prediction\n";
+	return;
+  }*/
 
+  //UINT predictedClass = anbcModel.getPredictedClassLabel();
+  UINT predictedClass = decisionTreeModel.getPredictedClassLabel();
+  //UINT predictedClass = adaBoostModel.getPredictedClassLabel();
+  //UINT predictedClass = knnModel.getPredictedClassLabel();
 
   // If we have predicted a valid gesure fire an event
-  if (anbcModel.getPredictedClassLabel() > 0)
+  if (predictedClass > 0)
   {
 	node->InvokeEvent(vtkSlicerGestureRecognitionLogic::GestureRecognizedEvent, &predictedClass);
   }
@@ -130,9 +173,12 @@ static double* RotMatrixToEulerAngles(vtkMatrix4x4* R)
   }
 
   // Convert Radian to degrees (normalized)
-  a[0] = x/PI;
-  a[1] = y/PI;
-  a[2] = z/PI;
+  a[0] = (x/PI);
+  a[1] = (y/PI);
+  a[2] = (z/PI);
+
+
+  //std::cout << a[0] << ", " << a[1] << ", " << a[2] << std::endl;
 
   return a;
 }
