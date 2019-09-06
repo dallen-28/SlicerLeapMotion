@@ -104,7 +104,6 @@ void qSlicerLeapCalibrationModuleWidget::setup()
   connect(d->DoubleSpinBox_Baseline, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qSlicerLeapCalibrationModuleWidget::onBaselineChanged);
 }
 
-
 //----------------------------------------------------------------------------
 void qSlicerLeapCalibrationModuleWidget::updateUI()
 {

@@ -25,8 +25,6 @@
 #include "vtkMRMLLinearTransformNode.h"
 
 class qSlicerGestureRecognitionModuleWidgetPrivate;
-class vtkMRMLNode;
-class vtkMRMLLinearTransformNode;
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 class Q_SLICER_QTMODULES_GESTURERECOGNITION_EXPORT qSlicerGestureRecognitionModuleWidget :
@@ -35,16 +33,14 @@ class Q_SLICER_QTMODULES_GESTURERECOGNITION_EXPORT qSlicerGestureRecognitionModu
   Q_OBJECT
 
 public:
-
   typedef qSlicerAbstractModuleWidget Superclass;
-  qSlicerGestureRecognitionModuleWidget(QWidget *parent=0);
+  qSlicerGestureRecognitionModuleWidget(QWidget* parent = 0);
   virtual ~qSlicerGestureRecognitionModuleWidget();
 
 
 public slots:
-
-	void OnPredictButtonClicked();
-
+  void OnPredictButtonClicked();
+  void OnTransformNodeChanged(vtkMRMLNode* node);
 
 protected:
   QScopedPointer<qSlicerGestureRecognitionModuleWidgetPrivate> d_ptr;

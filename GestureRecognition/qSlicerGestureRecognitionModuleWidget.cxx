@@ -19,21 +19,25 @@
 #include <QDebug>
 
 // SlicerQt includes
+#include <qMRMLNodeComboBox.h>
+
+// Local includes
 #include "qSlicerGestureRecognitionModuleWidget.h"
 #include "ui_qSlicerGestureRecognitionModuleWidget.h"
 
-#include "vtkSlicerGestureRecognitionLogic.h"
+// Logic includes
+#include <vtkSlicerGestureRecognitionLogic.h>
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 class qSlicerGestureRecognitionModuleWidgetPrivate: public Ui_qSlicerGestureRecognitionModuleWidget
 {
-	Q_DECLARE_PUBLIC(qSlicerGestureRecognitionModuleWidget);
+  Q_DECLARE_PUBLIC(qSlicerGestureRecognitionModuleWidget);
 protected:
-	qSlicerGestureRecognitionModuleWidget* const q_ptr;
+  qSlicerGestureRecognitionModuleWidget* const q_ptr;
 public:
   qSlicerGestureRecognitionModuleWidgetPrivate(qSlicerGestureRecognitionModuleWidget& object);
-	vtkSlicerGestureRecognitionLogic * logic() const;
+  vtkSlicerGestureRecognitionLogic* logic() const;
 };
 
 //-----------------------------------------------------------------------------
@@ -41,16 +45,16 @@ public:
 
 //-----------------------------------------------------------------------------
 qSlicerGestureRecognitionModuleWidgetPrivate::qSlicerGestureRecognitionModuleWidgetPrivate(qSlicerGestureRecognitionModuleWidget& object)
-	: q_ptr(&object)
+  : q_ptr(&object)
 {
-	
+
 }
 
+//-----------------------------------------------------------------------------
 vtkSlicerGestureRecognitionLogic* qSlicerGestureRecognitionModuleWidgetPrivate::logic() const
 {
-	Q_Q(const qSlicerGestureRecognitionModuleWidget);
-	return vtkSlicerGestureRecognitionLogic::SafeDownCast(q->logic());
-	
+  Q_Q(const qSlicerGestureRecognitionModuleWidget);
+  return vtkSlicerGestureRecognitionLogic::SafeDownCast(q->logic());
 }
 
 //-----------------------------------------------------------------------------
@@ -58,21 +62,43 @@ vtkSlicerGestureRecognitionLogic* qSlicerGestureRecognitionModuleWidgetPrivate::
 
 //-----------------------------------------------------------------------------
 qSlicerGestureRecognitionModuleWidget::qSlicerGestureRecognitionModuleWidget(QWidget* _parent)
-  : Superclass( _parent )
-  , d_ptr( new qSlicerGestureRecognitionModuleWidgetPrivate (*this) )
+  : Superclass(_parent)
+  , d_ptr(new qSlicerGestureRecognitionModuleWidgetPrivate(*this))
 {
 }
 
 //-----------------------------------------------------------------------------
 qSlicerGestureRecognitionModuleWidget::~qSlicerGestureRecognitionModuleWidget()
 {
+  Q_D(qSlicerGestureRecognitionModuleWidget);
+
+  QObject::disconnect(d->pushButton, &QPushButton::clicked, this, &qSlicerGestureRecognitionModuleWidget::OnPredictButtonClicked);
 }
 
+//-----------------------------------------------------------------------------
 void qSlicerGestureRecognitionModuleWidget::OnPredictButtonClicked()
 {
-	Q_D(qSlicerGestureRecognitionModuleWidget);
+  Q_D(qSlicerGestureRecognitionModuleWidget);
 
-	d->logic()->StartPrediction((vtkMRMLLinearTransformNode*)d->transformDropDown->currentNode());
+  d->logic()->StartPrediction((vtkMRMLLinearTransformNode*)d->transformDropDown->currentNode());
+}
+
+//----------------------------------------------------------------------------
+void qSlicerGestureRecognitionModuleWidget::OnTransformNodeChanged(vtkMRMLNode* node)
+{
+  Q_D(qSlicerGestureRecognitionModuleWidget);
+
+  vtkMRMLLinearTransformNode* tNode = vtkMRMLLinearTransformNode::SafeDownCast(node);
+  if (tNode == nullptr)
+  {
+    qCritical() << "Invalid node in combo box! How did this happen.";
+    d->pushButton->setEnabled(false);
+    return;
+  }
+  else
+  {
+    d->pushButton->setEnabled(true);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -82,19 +108,15 @@ void qSlicerGestureRecognitionModuleWidget::setup()
   d->setupUi(this);
   this->Superclass::setup();
 
+  // Wire up transform nodes to dropdown
+  d->transformDropDown->setNodeTypes(QStringList() << (QString)"vtkMRMLLinearTransformNode");
+  d->transformDropDown->setSelectNodeUponCreation(true);
+  d->transformDropDown->setAddEnabled(false);
+  d->transformDropDown->setRemoveEnabled(false);
+  d->transformDropDown->setNoneEnabled(false);
+  d->transformDropDown->setMRMLScene(this->mrmlScene());
+  d->transformDropDown->setToolTip("Pick a transform to observe");
 
-	// Wire up transform nodes to dropdown
-	d->transformDropDown->setNodeTypes(QStringList() << (QString)"vtkMRMLLinearTransformNode");
-	d->transformDropDown->setSelectNodeUponCreation(true);
-	d->transformDropDown->setAddEnabled(false);
-	d->transformDropDown->setRemoveEnabled(false);
-	d->transformDropDown->setNoneEnabled(false);
-	this->setMRMLScene(d->logic()->GetMRMLScene());
-	d->transformDropDown->setMRMLScene(this->mrmlScene());
-	d->transformDropDown->setToolTip("Pick a transform to observe1");
-	
-
-	connect(d->pushButton, SIGNAL(clicked()), this, SLOT(OnPredictButtonClicked()));
-
-
+  QObject::connect(d->pushButton, &QPushButton::clicked, this, &qSlicerGestureRecognitionModuleWidget::OnPredictButtonClicked);
+  QObject::connect(d->transformDropDown, static_cast<void (qMRMLNodeComboBox::*)(vtkMRMLNode*)>(&qMRMLNodeComboBox::currentNodeChanged), this, &qSlicerGestureRecognitionModuleWidget::OnTransformNodeChanged);
 }
