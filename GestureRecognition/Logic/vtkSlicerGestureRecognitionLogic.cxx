@@ -81,22 +81,22 @@ vtkSlicerGestureRecognitionLogic::vtkSlicerGestureRecognitionLogic()
   // TODO : download files so that tuning can be done regularly
   if (!this->DecisionTreeModel->load(GetModuleShareDirectory() + "/DecisionTreeModel.grt"))
   {
-    vtkErrorMacro("Failed to load Decision Tree model from path: " << GetModuleShareDirectory() + "/DecisionTreeModel.grt");
+    vtkErrorMacro("Failed to load Decision Tree model from path: " << this->GetModuleShareDirectory() + "/DecisionTreeModel.grt");
   }
 
   if (!this->AdaBoostModel->load(GetModuleShareDirectory() + "/AdaBoostModel.grt"))
   {
-    vtkErrorMacro("Failed to load AdaBoost model from path: " << GetModuleShareDirectory() + "/AdaBoostModel.grt");
+    vtkErrorMacro("Failed to load AdaBoost model from path: " << this->GetModuleShareDirectory() + "/AdaBoostModel.grt");
   }
 
   // Load Adaptive Naive Bayes Classifier Model
   if (!this->ANBCModel->load(GetModuleShareDirectory() + "/ANBCModel.grt"))
   {
-    vtkErrorMacro("Failed to load ANBC model from path: " << GetModuleShareDirectory() + "/ANBCModel.grt");
+    vtkErrorMacro("Failed to load ANBC model from path: " << this->GetModuleShareDirectory() + "/ANBCModel.grt");
   }
   if (!this->KNNModel->load(GetModuleShareDirectory() + "/kNNModel.grt"))
   {
-    vtkErrorMacro("Failed to load KNN model from path: " << GetModuleShareDirectory() + "/KNNModel.grt");
+    vtkErrorMacro("Failed to load KNN model from path: " << this->GetModuleShareDirectory() + "/KNNModel.grt");
   }
 }
 
